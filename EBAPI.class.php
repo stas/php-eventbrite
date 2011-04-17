@@ -35,9 +35,24 @@ class EBAPI {
 	var $user_key;
 	
 	/**
+	 * User email
+	 */
+	var $user;
+	
+	/**
+	 * User password
+	 */
+	var $password;
+	
+	/**
 	 * API URL to webservice
 	 */
 	var $api_url;
+	
+	/**
+	 * Error status
+	 */
+	var $error;
 	
 	/**
 	 * Default API URL
@@ -55,7 +70,7 @@ class EBAPI {
 	 * @param String $app_key, your Eventbrite application key
 	 * @param String $user_key, your Eventbrite user key
 	 */
-	function EBAPI( $app_key, $user_key = null ) {
+	function EBAPI( $app_key = null, $user_key = null ) {
 		$this->app_key = $app_key;
 		$this->user_key = $user_key;
 		$this->setUrl( $this->default_api_url );
@@ -69,6 +84,24 @@ class EBAPI {
 	function setUrl( $url ) {
 		$this->api_url = parse_url( $url );
 		$this->checkSecure();
+	}
+	
+	/**
+	 * Sets user email
+	 *
+	 * @param String $email, the email adress to be used
+	 */
+	function setUser( $email ) {
+		$this->user = $email;
+	}
+	
+	/**
+	 * Sets user password
+	 *
+	 * @param String $pass, the password to be used
+	 */
+	function setPassword( $pass ) {
+		$this->password = $pass;
 	}
 	
 	/**
@@ -87,9 +120,20 @@ class EBAPI {
 	}
 	
 	/**
+	 * Checks for errors
+	 *
+	 * @return null on no errors, Mixed data on error
+	 */
+	function hasError() {
+		return $this->error;
+	}
+	
+	/**
 	 * Dynamic methods handler
 	 */
 	function __call( $method, $args ) {
+		// Reset error status
+		$this->error = null;
 		
 		// Build query
 		$query_data = array();
@@ -97,6 +141,8 @@ class EBAPI {
 		// Add auth details to query
 		$query_data['app_key'] = $this->app_key;
 		$query_data['user_key'] = $this->user_key;
+		$query_data['user'] = $this->user;
+		$query_data['password'] = $this->password;
 		
 		// Parse args
 		foreach ( $args as $k => $v )
@@ -114,9 +160,12 @@ class EBAPI {
 		$response = file_get_contents( $http_query );
 		
 		if( $response )
-			return json_decode( $response );
+			$response = json_decode( $response );
 		
-		return null;
+		if( isset( $response->error ) )
+			$this->error = $response->error;
+		
+		return $response;
 	}
 	
 	/**
