@@ -124,7 +124,7 @@ class EBAPI {
 	 *
 	 * @return null on no errors, Mixed data on error
 	 */
-	function hasError() {
+	function getError() {
 		return $this->error;
 	}
 	
@@ -145,8 +145,13 @@ class EBAPI {
 		$query_data['password'] = $this->password;
 		
 		// Parse args
-		foreach ( $args as $k => $v )
-			$query_data[ $this->api_methods[$method][$k] ] = $v;
+		if( is_array( $args ) )
+			$args = reset( $args );
+		
+		if( $args )
+			foreach ( $this->api_methods[$method] as $k )
+				if( array_key_exists( $k, $args ) )
+					$query_data[$k] = $args[$k];
 		
 		// Build the http query
 		$query_url = $this->api_url;
@@ -156,7 +161,7 @@ class EBAPI {
 		$http_query = $query_url['scheme'] . '://';
 		unset( $query_url['scheme'] );
 		$http_query .= implode( '', $query_url );
-		$http_query .= http_build_query( $query_data );
+		$http_query .= http_build_query( $query_data, '', '&amp;' );
 		$response = file_get_contents( $http_query );
 		
 		if( $response )
