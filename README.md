@@ -2,6 +2,7 @@
 ----------------------------------
 
 Example use:
+
 	<?php
 		require 'EBAPI.class.php';
 
@@ -12,5 +13,4 @@ Example use:
 		$resp = $eb_client->event_get( array('id' => 'EVENT_ID') );
 	?>
 
-Eventbrite API documentation:
-	http://developer.eventbrite.com/doc
+Eventbrite API documentation:  http://developer.eventbrite.com/doc
