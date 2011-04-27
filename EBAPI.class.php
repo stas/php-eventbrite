@@ -161,7 +161,7 @@ class EBAPI {
 		$http_query = $query_url['scheme'] . '://';
 		unset( $query_url['scheme'] );
 		$http_query .= implode( '', $query_url );
-		$http_query .= http_build_query( $query_data, '', '&' );
+		$http_query .= http_build_query( $query_data, '', '&amp;' );
 		$response = file_get_contents( $http_query );
 		
 		if( $response )
