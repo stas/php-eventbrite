@@ -113,10 +113,7 @@ class EBAPI {
 		$this->secure = (bool) $value;
 		
 		if( !empty( $this->api_url ) && isset( $this->api_url['scheme'] ) )
-			if( !$this->secure )
-				$this->api_url['scheme'] = 'http';
-			else
-				$this->api_url['scheme'] = 'https';
+			$this->api_url['scheme'] = ( !$this->secure ) ? 'http' : 'https';
 	}
 	
 	/**
@@ -140,18 +137,21 @@ class EBAPI {
 		
 		// Add auth details to query
 		$query_data['app_key'] = $this->app_key;
-		$query_data['user_key'] = $this->user_key;
-		$query_data['user'] = $this->user;
-		$query_data['password'] = $this->password;
+		if( isset($this->user_key ))
+			$query_data['user_key'] = $this->user_key;
+		else
+		{
+			$query_data['user'] = $this->user;
+			$query_data['password'] = $this->password;
+		}
 		
-		// Parse args
+		// Unpack our arguments
 		if( is_array( $args ) )
-			$args = reset( $args );
-		
-		if( $args )
-			foreach ( $this->api_methods[$method] as $k )
-				if( array_key_exists( $k, $args ) )
-					$query_data[$k] = $args[$k];
+			$request_parameters = $args[0];
+			
+		// Parse args
+		if( is_array( $request_parameters ) )
+			$query_data = array_merge( $query_data, array_intersect_key( $request_parameters, array_flip($this->api_methods[$method])));
 		
 		// Build the http query
 		$query_url = $this->api_url;
