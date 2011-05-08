@@ -148,10 +148,13 @@ class EBAPI {
 		if( is_array( $args ) )
 			$args = reset( $args );
 		
-		if( $args )
+		// If method exists, try to match it's params
+		if( is_array( $args ) && is_array( $this->api_methods[$method] ) ) {
 			foreach ( $this->api_methods[$method] as $k )
 				if( array_key_exists( $k, $args ) )
 					$query_data[$k] = $args[$k];
+		} else // Or, try an undefined method, you're on your own from here
+			$query_data = array_merge_recursive( $query_data, array( $args ) );
 		
 		// Build the http query
 		$query_url = $this->api_url;
